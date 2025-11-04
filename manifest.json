@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Kirusha",
+  "description": "Запускатор представительств Tproger",
+  "version": "1.0.0",
+  "content_scripts": [
+    {
+      "js": ["content-scripts.js"],
+      "matches": ["https://kod.mob-edu.ru/*"]
+    }
+  ],
+  "icons": { "128": "heart.png" },
+  "permissions": ["activeTab", "storage", "scripting"],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
