@@ -1,12 +1,33 @@
-const pageInfo = {
-  url: window.location.href,
-  title: document.title,
-  images: Array.from(document.images).map((img) => img.src),
-};
-console.log("Page info: ", pageInfo);
+// const pageInfo = {
+//   url: window.location.href,
+//   title: document.title,
+//   images: Array.from(document.images).map((img) => img.src),
+// };
+// console.log("Page info: ", pageInfo);
 
 const qtext = document.querySelector(".qtext");
 const clearfix = qtext ? qtext.querySelector(".clearfix") : null;
+
+/** @type {HTMLInputElement} */
+const textarea = document.querySelector("textarea");
+
+/** @type {HTMLParagraphElement} */
+const state = document.querySelector(".state");
+
+/** @type {HTMLInputElement[]} */
+// const buttons = document.querySelectorAll(".btn");
+
+/** @type {HTMLInputElement} */
+// let check_button;
+// buttons.forEach((elem) => {
+//   if (elem.textContent == "Проверить") {
+//     check_button = elem;
+//   }
+// });
+// console.log("check_button: ", check_button);
+
+/** @type {HTMLFormElement} */
+let form = document.querySelector("form");
 
 if (!qtext || !clearfix) {
   throw new Error(
@@ -25,38 +46,19 @@ if (clearfix || qtext) {
     }
   });
 }
-// if (clearfix || qtext) {
-//   for (let item of clearfix.children) {
-//     if (
-//       item ||
-//       item.textContent ||
-//       item.value ||
-//       item.children[0].textContent
-//     ) {
-//       for (let item_child of item.children) {
-//         let text = item_child.textContent;
-//         prompt += text;
-//       }
-//     }
-//   }
-
 console.log("Итоговый промпт: ", prompt);
 
-// (async () => {
-//   await GetToken();
-//   if (CLIENT_KEY) {
-//     await sendPrompt(prompt);
-//   }
-// })();
-
-// navigator.serviceWorker.controller.postMessage(prompt);
-// navigator.serviceWorker.ready
-//   .then((register) => {
-//     register.active.postMessage(prompt);
-//   })
-//   .catch((e) => console.error("Error send serviceWorker message: ", e.message));
-
-chrome.runtime.sendMessage({
-  action: "successPrompt",
-  data: prompt,
-});
+if (state.textContent != "Верно") {
+  chrome.runtime.sendMessage(
+    {
+      action: "successPrompt",
+      data: prompt,
+    },
+    (response) => {
+      console.log("Gigachat answer: ", response.answer);
+      textarea.textContent = response.answer;
+      // form.submit();
+      return true;
+    }
+  );
+}
