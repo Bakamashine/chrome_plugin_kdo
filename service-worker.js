@@ -10,39 +10,81 @@ const SCOPE = "GIGACHAT_API_PERS";
 
 let CLIENT_KEY;
 
-async function AuthorizateFetch(url, method) {
-  return await fetch(url, {
+/**
+ * Настройка fetch для авторизации
+ * @param {string} url
+ * @param {string} method
+ * @returns
+ */
+async function AuthorizateFetch(url, method, payload) {
+  return fetch(url, {
     method,
+    // mode: "cors",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       Accept: "application/json",
       RqUID: CLIENT_ID,
       Authorization: `Basic ${AUTH_KEY}`,
     },
-  });
+    credentials: "include",
+    // body
+    body: new URLSearchParams(payload).toString(), // Формируем параметры запроса
+  })
+    .then((res) => {
+      console.log("res.status: ", res.status);
+    })
+    .then((res) => {
+      console.log(res.body);
+    })
+    .then((res) => res.json())
+    .then((data) => console.log("+", data))
+    .catch((e) => {
+      console.log("Error: ", e.message);
+      console.log(e.response);
+    });
+  // try {
+  //   let result = await fetch(url, {
+  //     method,
+  //     mode: "cors",
+  //     headers: {
+  //       "Content-Type": "application/x-www-form-urlencoded",
+  //       Accept: "application/json",
+  //       RqUID: CLIENT_ID,
+  //       Authorization: `Basic ${AUTH_KEY}`,
+  //     },
+  //     credentials: "include",
+  //     // body
+  //     body: new URLSearchParams(payload).toString(), // Формируем параметры запроса
+
+  //   });
+  //   return result;
+  // } catch (e) {
+  //   console.error(e);
+  // }
 }
 
 /**
  * Fetch для авторизированных действий
- * @param {*} url
- * @param {*} method
+ * @param {string} url
+ * @param {string} method
  * @param {object} data
  * @returns
  */
 async function ApiFetch(url, method, data) {
-  return await fetch(url, {
+  let result = await fetch(url, {
     method,
     data,
-    // data: Object.assign(data, {
-    // 	agent: new https.Agent
-    // }),
-	mode: "cors",
+    mode: "cors",
     headers: {
       Authorization: `Bearer ${CLIENT_KEY}`,
       Accept: "application/json",
-      "Content-Type": "applicaiton/json",
+      "Content-Type": "application/json",
     },
+    credentials: "include",
   });
+
+  console.log("status: ", result.status);
+  console.log("body: ", result.body);
 }
 
 /**
@@ -83,7 +125,7 @@ function ReadAnswer(response) {
 async function sendPrompt(text) {
   console.log("Отправка запроса в Gigachat...");
   const data = {
-    model: "Gigachat-2-Max",
+    model: "Gigachat",
     messages: [
       {
         role: "system",
@@ -106,49 +148,19 @@ async function sendPrompt(text) {
   }
 }
 
-const pageInfo = {
-  url: window.location.href,
-  title: document.title,
-  images: Array.from(document.images).map((img) => img.src),
-};
-console.log("Page info: ", pageInfo);
-
-const qtext = document.querySelector(".qtext");
-const clearfix = qtext.children[0];
-
-if (!qtext || !clearfix) {
-  throw new Error(
-    "Not found tag <div class='clearfix' /> or <div class='qtext' />"
-  );
-}
-
-console.log("qtext: ", qtext);
-console.log("clearfix: ", clearfix);
-
+console.log("service is worked!");
 let prompt = "";
-if (clearfix || qtext) {
-  for (let item of clearfix.children) {
-    if (
-      item ||
-      item.textContent ||
-      item.value ||
-      item.children[0].textContent
-    ) {
-      for (let item_child of item.children) {
-        let text = item_child.textContent;
-        prompt += text;
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  console.log("Message received!");
+  // console.log(message.data)
+  if (message.data) prompt = message.data;
+  // console.log("prompt: ", prompt);
+  if (prompt) {
+    (async () => {
+      await GetToken();
+      if (CLIENT_KEY) {
+        await sendPrompt(prompt);
       }
-    }
+    })();
   }
-
-  console.log("Итоговый промпт: ", prompt);
-
-  (async () => {
-    await GetToken();
-    if (CLIENT_KEY) {
-      await sendPrompt(prompt);
-    }
-  })();
-}
-
-chrome.runtime.sendMessage({ action: "pageInfo", data: pageInfo });
+});

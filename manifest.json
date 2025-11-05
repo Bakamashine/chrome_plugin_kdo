@@ -3,14 +3,23 @@
   "name": "Kirusha",
   "description": "Запускатор представительств Tproger",
   "version": "1.0.0",
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
   "content_scripts": [
     {
-      "js": ["content-scripts.js"],
+      "js": ["content-script.js"],
       "matches": ["https://kod.mob-edu.ru/*"]
     }
   ],
   "icons": { "128": "heart.png" },
   "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": [
+    "https://ngw.devices.sberbank.ru:9443/api/v2/oauth",
+    "https://gigachat.devices.sberbank.ru/api/v1/chat/completions",
+    "http://localhost/*"
+  ],
   "action": {
     "default_popup": "popup.html"
   }
