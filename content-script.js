@@ -11,11 +11,49 @@ const state = document.querySelector(".state");
 /** @type {HTMLFormElement} */
 let form = document.querySelector("form");
 
+let context_overflow;
+let selects_prompt = "";
 if (!qtext || !clearfix) {
-  throw new Error(
+  if (qtext) {
+    /** @type {HTMLSelectElement} */
+    const selects = document.querySelectorAll("select");
+
+    [...selects.options].forEach((elem) => {
+      if (elem.textContent) {
+      }
+    });
+  }
+
+  console.error(
     "Not found tag <div class='clearfix' /> or <div class='qtext' />"
   );
-}
+
+  let overflow = document.querySelectorAll(".no-overflow")[1];
+  if (overflow) {
+    [...overflow.children].forEach((elem) => {
+      if (elem.textContent) context_overflow += elem.textContent.trim();
+    });
+    console.log("context_overflow: ", context_overflow);
+
+    // if (state.textContent != "Верно") {
+      chrome.runtime.sendMessage(
+        {
+          action: "successPrompt",
+          data: context_overflow.concat("\nБез вариантов ответа"),
+        },
+        (response) => {
+          console.log("Gigachat answer: ", response.answer);
+
+          let editor = document.querySelector("#id_onlinetext_editoreditable");
+          if (editor && response.answer) {
+            editor.textContent = response.answer;
+          }
+        }
+      );
+    }
+    throw ''
+  }
+// }
 
 console.log("qtext: ", qtext);
 console.log("clearfix: ", clearfix);
@@ -55,7 +93,7 @@ if (answer) {
 if (variant_prompt && variant_prompt != "Варианты ответов: ") {
   prompt += variant_prompt;
 } else {
-  prompt += "Без вариантов ответа"
+  prompt += "Без вариантов ответа";
 }
 console.log("Итоговый промпт: ", prompt);
 

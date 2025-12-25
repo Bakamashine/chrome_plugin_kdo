@@ -14,9 +14,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         formData.append("text", prompt);
         let response = await fetch(LOCAL_URL, {
           method: "POST",
-          // headers: {
-          //   "Content-Type": "multipart/form-data"
-          // },
           body: formData
         });
         let answer = await response.text();
